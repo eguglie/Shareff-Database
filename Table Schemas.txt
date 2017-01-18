@@ -7,13 +7,17 @@ CREATE TABLE public."userTable"
     "userId" uuid NOT NULL DEFAULT uuid_generate_v4(),
     "firstName" text COLLATE pg_catalog."default" NOT NULL,
     "lastName" text COLLATE pg_catalog."default" NOT NULL,
-    "email" text COLLATE pg_catalog."default" NOT NULL,
-    "password" text COLLATE pg_catalog."default" NOT NULL,
+    email text COLLATE pg_catalog."default" NOT NULL,
+    password text COLLATE pg_catalog."default" NOT NULL,
     "photoUrl" text COLLATE pg_catalog."default",
-    "description" text COLLATE pg_catalog."default",
+    description text COLLATE pg_catalog."default",
     "avgRating" bigint,
     "addressId" uuid,
-    CONSTRAINT "userId" PRIMARY KEY ("userId")
+    CONSTRAINT "userId" PRIMARY KEY ("userId"),
+    CONSTRAINT "addressId" FOREIGN KEY ("addressId")
+        REFERENCES public.address ("addressId") MATCH SIMPLE
+        ON UPDATE NO ACTION
+        ON DELETE NO ACTION
 )
 WITH (
     OIDS = FALSE
