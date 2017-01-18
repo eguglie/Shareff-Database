@@ -1,50 +1,46 @@
--- Table: public.usertable
+-- Table: public."userTable"
 
--- DROP TABLE public.usertable;
+-- DROP TABLE public."userTable";
 
-CREATE TABLE public.usertable
+CREATE TABLE public."userTable"
 (
-    userid uuid NOT NULL DEFAULT uuid_generate_v4(),
-    firstname text COLLATE pg_catalog."default" NOT NULL,
-    lastname text COLLATE pg_catalog."default" NOT NULL,
-    email text COLLATE pg_catalog."default" NOT NULL,
-    password text COLLATE pg_catalog."default" NOT NULL,
-    photourl text COLLATE pg_catalog."default",
-    description text COLLATE pg_catalog."default",
-    avgrating bigint,
-    addressid uuid,
-    CONSTRAINT userid PRIMARY KEY (userid),
-    CONSTRAINT addressid FOREIGN KEY (addressid)
-        REFERENCES public.address (addressid) MATCH SIMPLE
-        ON UPDATE NO ACTION
-        ON DELETE NO ACTION
+    "userId" uuid NOT NULL DEFAULT uuid_generate_v4(),
+    "firstName" text COLLATE pg_catalog."default" NOT NULL,
+    "lastName" text COLLATE pg_catalog."default" NOT NULL,
+    "email" text COLLATE pg_catalog."default" NOT NULL,
+    "password" text COLLATE pg_catalog."default" NOT NULL,
+    "photoUrl" text COLLATE pg_catalog."default",
+    "description" text COLLATE pg_catalog."default",
+    "avgRating" bigint,
+    "addressId" uuid,
+    CONSTRAINT "userId" PRIMARY KEY ("userId")
 )
 WITH (
     OIDS = FALSE
 )
 TABLESPACE pg_default;
 
-ALTER TABLE public.usertable
+ALTER TABLE public."userTable"
     OWNER to postgres;
-COMMENT ON TABLE public.usertable
+COMMENT ON TABLE public."userTable"
     IS 'Stores all information about registerd users of the Shareff System';
 
--- Table: public.address
+-- Table: public."address"
 
--- DROP TABLE public.address;
+-- DROP TABLE public."address";
 
-CREATE TABLE public.address
+CREATE TABLE public."address"
 (
-    addressid uuid NOT NULL DEFAULT uuid_generate_v4(),
-    line1 text COLLATE pg_catalog."default" NOT NULL,
-    line2 text COLLATE pg_catalog."default",
-    city text COLLATE pg_catalog."default" NOT NULL,
-    province text COLLATE pg_catalog."default" NOT NULL,
-    postalcode text COLLATE pg_catalog."default" NOT NULL,
-    userid uuid,
-    CONSTRAINT addressid PRIMARY KEY (addressid),
-    CONSTRAINT userid FOREIGN KEY (userid)
-        REFERENCES public.usertable (userid) MATCH SIMPLE
+    "addressId" uuid NOT NULL DEFAULT uuid_generate_v4(),
+    "line1" text COLLATE pg_catalog."default" NOT NULL,
+    "line2" text COLLATE pg_catalog."default",
+    "city" text COLLATE pg_catalog."default" NOT NULL,
+    "province" text COLLATE pg_catalog."default" NOT NULL,
+    "postalCode" text COLLATE pg_catalog."default" NOT NULL,
+    "userId" uuid,
+    CONSTRAINT "addressId" PRIMARY KEY ("addressId"),
+    CONSTRAINT "userId" FOREIGN KEY ("userId")
+        REFERENCES public."userTable" ("userId") MATCH SIMPLE
         ON UPDATE CASCADE
         ON DELETE CASCADE
 )
@@ -53,31 +49,31 @@ WITH (
 )
 TABLESPACE pg_default;
 
-ALTER TABLE public.address
+ALTER TABLE public."address"
     OWNER to postgres;
-COMMENT ON TABLE public.address
+COMMENT ON TABLE public."address"
     IS 'Stores address information for either an rental item or user';
 
--- Table: public.userreview
+-- Table: public."userReview"
 
--- DROP TABLE public.userreview;
+-- DROP TABLE public."userReview";
 
-CREATE TABLE public.userreview
+CREATE TABLE public."userReview"
 (
-    reviewid uuid NOT NULL DEFAULT uuid_generate_v4(),
-    title text COLLATE pg_catalog."default",
-    comment text COLLATE pg_catalog."default",
-    useridfor uuid NOT NULL,
-    useridfrom uuid NOT NULL,
-    rating integer NOT NULL,
-    creationtime timestamp with time zone NOT NULL,
-    CONSTRAINT reviewid PRIMARY KEY (reviewid),
-    CONSTRAINT useridfor FOREIGN KEY (useridfor)
-        REFERENCES public.usertable (userid) MATCH SIMPLE
+    "reviewId" uuid NOT NULL DEFAULT uuid_generate_v4(),
+    "title" text COLLATE pg_catalog."default",
+    "comment" text COLLATE pg_catalog."default",
+    "userIdFor" uuid NOT NULL,
+    "userIdFrom" uuid NOT NULL,
+    "rating" integer NOT NULL,
+    "creationTime" timestamp with time zone NOT NULL,
+    CONSTRAINT "reviewId" PRIMARY KEY ("reviewId"),
+    CONSTRAINT "userIdFor" FOREIGN KEY ("userIdFor")
+        REFERENCES public."userTable" ("userId") MATCH SIMPLE
         ON UPDATE CASCADE
         ON DELETE CASCADE,
-    CONSTRAINT useridfrom FOREIGN KEY (useridfrom)
-        REFERENCES public.usertable (userid) MATCH SIMPLE
+    CONSTRAINT "userIdFrom" FOREIGN KEY ("userIdFrom")
+        REFERENCES public."userTable" ("userId") MATCH SIMPLE
         ON UPDATE CASCADE
         ON DELETE CASCADE
 )
@@ -86,30 +82,30 @@ WITH (
 )
 TABLESPACE pg_default;
 
-ALTER TABLE public.userreview
+ALTER TABLE public."userReview"
     OWNER to postgres;
 
--- Table: public.rentalitem
+-- Table: public."rentalItem"
 
--- DROP TABLE public.rentalitem;
+-- DROP TABLE public."rentalItem";
 
-CREATE TABLE public.rentalitem
+CREATE TABLE public."rentalItem"
 (
-    itemid uuid NOT NULL DEFAULT uuid_generate_v4(),
-    title text COLLATE pg_catalog."default" NOT NULL,
-    category json[],
-    description text COLLATE pg_catalog."default" NOT NULL,
-    price double precision NOT NULL,
-    addressid uuid,
-    termsofuse text COLLATE pg_catalog."default",
-    ownerid uuid NOT NULL,
-    CONSTRAINT itemid PRIMARY KEY (itemid),
-    CONSTRAINT addressid FOREIGN KEY (addressid)
-        REFERENCES public.address (addressid) MATCH SIMPLE
+    "itemId" uuid NOT NULL DEFAULT uuid_generate_v4(),
+    "title" text COLLATE pg_catalog."default" NOT NULL,
+    "category" json[],
+    "description" text COLLATE pg_catalog."default" NOT NULL,
+    "price" double precision NOT NULL,
+    "addressId" uuid,
+    "termsOfUse" text COLLATE pg_catalog."default",
+    "ownerId" uuid NOT NULL,
+    CONSTRAINT "itemId" PRIMARY KEY ("itemId"),
+    CONSTRAINT "addressId" FOREIGN KEY ("addressId")
+        REFERENCES public."address" ("addressId") MATCH SIMPLE
         ON UPDATE CASCADE
         ON DELETE SET NULL,
-    CONSTRAINT ownerid FOREIGN KEY (ownerid)
-        REFERENCES public.usertable (userid) MATCH SIMPLE
+    CONSTRAINT "ownerId" FOREIGN KEY ("ownerId")
+        REFERENCES public."userTable" ("userId") MATCH SIMPLE
         ON UPDATE CASCADE
         ON DELETE CASCADE
 )
@@ -118,20 +114,20 @@ WITH (
 )
 TABLESPACE pg_default;
 
-ALTER TABLE public.rentalitem
+ALTER TABLE public."rentalItem"
     OWNER to postgres;
 
--- Table: public.rentalitemphoto
+-- Table: public."rentalItemPhoto"
 
--- DROP TABLE public.rentalitemphoto;
+-- DROP TABLE public."rentalItemPhoto";
 
-CREATE TABLE public.rentalitemphoto
+CREATE TABLE public."rentalItemPhoto"
 (
-    itemid uuid NOT NULL,
-    photourl text COLLATE pg_catalog."default" NOT NULL,
-    CONSTRAINT rentalitemphoto_pkey PRIMARY KEY (itemid, photourl),
-    CONSTRAINT itemid FOREIGN KEY (itemid)
-        REFERENCES public.rentalitem (itemid) MATCH SIMPLE
+    "itemId" uuid NOT NULL,
+    "photoUrl" text COLLATE pg_catalog."default" NOT NULL,
+    CONSTRAINT "rentalItemPhoto_pkey" PRIMARY KEY ("itemId", "photoUrl"),
+    CONSTRAINT "itemId" FOREIGN KEY ("itemId")
+        REFERENCES public."rentalItem" ("itemId") MATCH SIMPLE
         ON UPDATE CASCADE
         ON DELETE CASCADE
 )
@@ -140,30 +136,29 @@ WITH (
 )
 TABLESPACE pg_default;
 
-ALTER TABLE public.rentalitemphoto
+ALTER TABLE public."rentalItemPhoto"
     OWNER to postgres;
 
--- Table: public.rentrequest
+-- Table: public."rentRequest"
 
--- DROP TABLE public.rentrequest;
+-- DROP TABLE public."rentRequest";
 
-CREATE TABLE public.rentrequest
+CREATE TABLE public."rentRequest"
 (
-    requestid uuid NOT NULL DEFAULT uuid_generate_v4(),
-    renterid uuid NOT NULL,
-    itemid uuid NOT NULL,
-    startdate date NOT NULL,
-    enddate date NOT NULL,
-    status text COLLATE pg_catalog."default" NOT NULL,
-    comments text COLLATE pg_catalog."default",
-    questions text COLLATE pg_catalog."default",
-    CONSTRAINT requestid PRIMARY KEY (requestid),
-    CONSTRAINT itemid FOREIGN KEY (itemid)
-        REFERENCES public.rentalitem (itemid) MATCH SIMPLE
+    "requestId" uuid NOT NULL DEFAULT uuid_generate_v4(),
+    "renterId" uuid NOT NULL,
+    "itemId" uuid NOT NULL,
+    "startDate" date NOT NULL,
+    "endDate" date NOT NULL, status text COLLATE pg_catalog."default" NOT NULL,
+    "comments" text COLLATE pg_catalog."default",
+    "questions" text COLLATE pg_catalog."default",
+    CONSTRAINT "requestId" PRIMARY KEY ("requestId"),
+    CONSTRAINT "itemId" FOREIGN KEY ("itemId")
+        REFERENCES public."rentalItem" ("itemId") MATCH SIMPLE
         ON UPDATE CASCADE
         ON DELETE CASCADE,
-    CONSTRAINT renterid FOREIGN KEY (renterid)
-        REFERENCES public.usertable (userid) MATCH SIMPLE
+    CONSTRAINT "renterId" FOREIGN KEY ("renterId")
+        REFERENCES public."userTable" ("userId") MATCH SIMPLE
         ON UPDATE CASCADE
         ON DELETE CASCADE
 )
@@ -172,32 +167,32 @@ WITH (
 )
 TABLESPACE pg_default;
 
-ALTER TABLE public.rentrequest
+ALTER TABLE public."rentRequest"
     OWNER to postgres;
 
--- Table: public.booking
+-- Table: public."booking"
 
--- DROP TABLE public.booking;
+-- DROP TABLE public."booking";
 
-CREATE TABLE public.booking
+CREATE TABLE public."booking"
 (
-    bookingid uuid NOT NULL DEFAULT uuid_generate_v4(),
-    itemid uuid NOT NULL,
-    rentrequestid uuid NOT NULL,
-    userid uuid,
-    startdate date NOT NULL,
-    enddate date NOT NULL,
-    CONSTRAINT bookingid PRIMARY KEY (bookingid),
-    CONSTRAINT itemid FOREIGN KEY (itemid)
-        REFERENCES public.rentalitem (itemid) MATCH SIMPLE
+    "bookingId" uuid NOT NULL DEFAULT uuid_generate_v4(),
+    "itemId" uuid NOT NULL,
+    "rentRequestId" uuid NOT NULL,
+    "userId" uuid,
+    "startDate" date NOT NULL,
+    "endDate" date NOT NULL,
+    CONSTRAINT "bookingId" PRIMARY KEY ("bookingId"),
+    CONSTRAINT "itemId" FOREIGN KEY ("itemId")
+        REFERENCES public."rentalItem" ("itemId") MATCH SIMPLE
         ON UPDATE CASCADE
         ON DELETE CASCADE,
-    CONSTRAINT rentrequestid FOREIGN KEY (rentrequestid)
-        REFERENCES public.rentrequest (requestid) MATCH SIMPLE
+    CONSTRAINT "rentRequestId" FOREIGN KEY ("rentRequestId")
+        REFERENCES public."rentRequest" ("requestId") MATCH SIMPLE
         ON UPDATE NO ACTION
         ON DELETE NO ACTION,
-    CONSTRAINT userid FOREIGN KEY (userid)
-        REFERENCES public.usertable (userid) MATCH SIMPLE
+    CONSTRAINT "userId" FOREIGN KEY ("userId")
+        REFERENCES public."userTable" ("userId") MATCH SIMPLE
         ON UPDATE NO ACTION
         ON DELETE NO ACTION
 )
@@ -209,28 +204,28 @@ TABLESPACE pg_default;
 ALTER TABLE public.booking
     OWNER to postgres;
 
--- Table: public.conversation
+-- Table: public."conversation"
 
--- DROP TABLE public.conversation;
+-- DROP TABLE public."conversation";
 
-CREATE TABLE public.conversation
+CREATE TABLE public."conversation"
 (
-    id uuid NOT NULL DEFAULT uuid_generate_v4(),
-    rentrequestid uuid NOT NULL,
-    renterid uuid NOT NULL,
-    ownerid uuid NOT NULL,
-    startdate timestamp without time zone NOT NULL,
-    CONSTRAINT conversation_pkey PRIMARY KEY (id),
-    CONSTRAINT ownerid FOREIGN KEY (ownerid)
-        REFERENCES public.usertable (userid) MATCH SIMPLE
+    "id" uuid NOT NULL DEFAULT uuid_generate_v4(),
+    "rentRequestId" uuid NOT NULL,
+    "renterId" uuid NOT NULL,
+    "ownerId" uuid NOT NULL,
+    "startDate" timestamp without time zone NOT NULL,
+    CONSTRAINT "conversation_pkey" PRIMARY KEY ("id"),
+    CONSTRAINT "ownerId" FOREIGN KEY ("ownerId")
+        REFERENCES public."userTable" ("userId") MATCH SIMPLE
         ON UPDATE NO ACTION
         ON DELETE CASCADE,
-    CONSTRAINT renterid FOREIGN KEY (renterid)
-        REFERENCES public.usertable (userid) MATCH SIMPLE
+    CONSTRAINT "renterId" FOREIGN KEY ("renterId")
+        REFERENCES public."userTable" ("userId") MATCH SIMPLE
         ON UPDATE CASCADE
         ON DELETE CASCADE,
-    CONSTRAINT rentrequestid FOREIGN KEY (rentrequestid)
-        REFERENCES public.rentrequest (requestid) MATCH SIMPLE
+    CONSTRAINT "rentRequestId" FOREIGN KEY ("rentRequestId")
+        REFERENCES public."rentRequest" ("requestId") MATCH SIMPLE
         ON UPDATE NO ACTION
         ON DELETE NO ACTION
 )
@@ -239,27 +234,27 @@ WITH (
 )
 TABLESPACE pg_default;
 
-ALTER TABLE public.conversation
+ALTER TABLE public."conversation"
     OWNER to postgres;
 
--- Table: public.message
+-- Table: public."message"
 
--- DROP TABLE public.message;
+-- DROP TABLE public."message";
 
-CREATE TABLE public.message
+CREATE TABLE public."message"
 (
-    messageid uuid NOT NULL DEFAULT uuid_generate_v4(),
-    senderid uuid NOT NULL,
-    timesent timestamp with time zone NOT NULL,
-    content text COLLATE pg_catalog."default" NOT NULL,
-    conversationid uuid NOT NULL,
-    CONSTRAINT messageid PRIMARY KEY (messageid),
-    CONSTRAINT conversationid FOREIGN KEY (conversationid)
-        REFERENCES public.conversation (id) MATCH SIMPLE
+    "messageId" uuid NOT NULL DEFAULT uuid_generate_v4(),
+    "senderId" uuid NOT NULL,
+    "timeSent" timestamp with time zone NOT NULL,
+    "content" text COLLATE pg_catalog."default" NOT NULL,
+    "conversationId" uuid NOT NULL,
+    CONSTRAINT "messageId" PRIMARY KEY ("messageId"),
+    CONSTRAINT "conversationId" FOREIGN KEY ("conversationId")
+        REFERENCES public."conversation" ("id") MATCH SIMPLE
         ON UPDATE NO ACTION
         ON DELETE CASCADE,
-    CONSTRAINT senderid FOREIGN KEY (senderid)
-        REFERENCES public.usertable (userid) MATCH SIMPLE
+    CONSTRAINT "senderId" FOREIGN KEY ("senderId")
+        REFERENCES public."userTable" ("userId") MATCH SIMPLE
         ON UPDATE NO ACTION
         ON DELETE NO ACTION
 )
@@ -268,5 +263,5 @@ WITH (
 )
 TABLESPACE pg_default;
 
-ALTER TABLE public.message
+ALTER TABLE public."message"
     OWNER to postgres;
