@@ -11,13 +11,8 @@ CREATE TABLE public."userTable"
     password text COLLATE pg_catalog."default" NOT NULL,
     "photoUrl" text COLLATE pg_catalog."default",
     description text COLLATE pg_catalog."default",
-    "avgRating" bigint,
-    "addressId" uuid,
-    CONSTRAINT "userId" PRIMARY KEY ("userId"),
-    CONSTRAINT "addressId" FOREIGN KEY ("addressId")
-        REFERENCES public.address ("addressId") MATCH SIMPLE
-        ON UPDATE NO ACTION
-        ON DELETE NO ACTION
+    "avgRating" double precision,
+    CONSTRAINT "userId" PRIMARY KEY ("userId")
 )
 WITH (
     OIDS = FALSE
@@ -27,21 +22,22 @@ TABLESPACE pg_default;
 ALTER TABLE public."userTable"
     OWNER to postgres;
 COMMENT ON TABLE public."userTable"
-    IS 'Stores all information about registerd users of the Shareff System';
+    IS 'Stores all information about registerd users of the Shareff System';s
 
--- Table: public."address"
+-- Table: public.address
 
--- DROP TABLE public."address";
+-- DROP TABLE public.address;
 
-CREATE TABLE public."address"
+CREATE TABLE public.address
 (
     "addressId" uuid NOT NULL DEFAULT uuid_generate_v4(),
-    "line1" text COLLATE pg_catalog."default" NOT NULL,
-    "line2" text COLLATE pg_catalog."default",
-    "city" text COLLATE pg_catalog."default" NOT NULL,
-    "province" text COLLATE pg_catalog."default" NOT NULL,
+    line1 text COLLATE pg_catalog."default" NOT NULL,
+    line2 text COLLATE pg_catalog."default",
+    city text COLLATE pg_catalog."default" NOT NULL,
+    province text COLLATE pg_catalog."default" NOT NULL,
     "postalCode" text COLLATE pg_catalog."default" NOT NULL,
-    "userId" uuid,
+    "userId" uuid NOT NULL,
+    "isPrimary" boolean NOT NULL DEFAULT true,
     CONSTRAINT "addressId" PRIMARY KEY ("addressId"),
     CONSTRAINT "userId" FOREIGN KEY ("userId")
         REFERENCES public."userTable" ("userId") MATCH SIMPLE
@@ -53,9 +49,9 @@ WITH (
 )
 TABLESPACE pg_default;
 
-ALTER TABLE public."address"
+ALTER TABLE public.address
     OWNER to postgres;
-COMMENT ON TABLE public."address"
+COMMENT ON TABLE public.address
     IS 'Stores address information for either an rental item or user';
 
 -- Table: public."userReview"
