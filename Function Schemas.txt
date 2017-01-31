@@ -1,0 +1,259 @@
+-- FUNCTION: public.createAddress(text, text, text, bigint, text, text, boolean, double precision, double precision)
+
+-- DROP FUNCTION public.createAddress(text, text, text, bigint, text, text, boolean, double precision, double precision);
+
+CREATE OR REPLACE FUNCTION public."createAddress"(
+	city text,
+	province text,
+	"postalCode" text,
+	"userId" bigint,
+	line1 text,
+	line2 text DEFAULT NULL::text,
+	"isPrimary" boolean DEFAULT true,
+	longitude double precision DEFAULT 0.0,
+	latitude double precision DEFAULT 0.0)
+    RETURNS uuid
+    LANGUAGE 'plpgsql'
+    COST 100.0
+    VOLATILE NOT LEAKPROOF 
+AS $function$
+
+DECLARE
+	"addressId" uuid;
+BEGIN
+	"addressId" := uuid_generate_v4();
+ 	INSERT INTO "address" ("addressId", "line1", "line2", "city", "province", "postalCode", "userId", "isPrimary", "longitude", "latitude")
+    VALUES ("addressId", "line1", "line2", "city", "province", "postalCode", "userId", "isPrimary", "longitude", "latitude");
+    
+    RETURN "addressId";
+END;
+
+$function$;
+
+ALTER FUNCTION public."createAddress"(text, text, text, bigint, text, text, boolean, double precision, double precision)
+    OWNER TO postgres;
+
+-- FUNCTION: public.createBooking(bigint, uuid, bigint, timestamp with time zone, timestamp with time zone)
+
+-- DROP FUNCTION public.createBooking(bigint, uuid, bigint, timestamp with time zone, timestamp with time zone);
+
+CREATE OR REPLACE FUNCTION public."createBooking"(
+	"itemId" bigint,
+	"rentRequestId" uuid,
+	"userId" bigint,
+	"startDate" timestamp with time zone,
+	"endDate" timestamp with time zone)
+    RETURNS uuid
+    LANGUAGE 'plpgsql'
+    COST 100.0
+    VOLATILE NOT LEAKPROOF 
+AS $function$
+
+DECLARE
+	"bookingId" uuid;
+BEGIN
+	"bookingId" := uuid_generate_v4();
+ 	INSERT INTO "booking" ("bookingId", "itemId", "rentRequestId", "userId", "startDate", "endDate")
+    VALUES ("bookingId", "itemId", "rentRequestId", "userId", "startDate", "endDate");
+    
+    RETURN "bookingId";
+END;
+
+$function$;
+
+ALTER FUNCTION public."createBooking"(bigint, uuid, bigint, timestamp with time zone, timestamp with time zone)
+    OWNER TO postgres;
+
+-- FUNCTION: public.createConversation(uuid, bigint, bigint)
+
+-- DROP FUNCTION public.createConversation(uuid, bigint, bigint);
+
+CREATE OR REPLACE FUNCTION public."createConversation"(
+	"rentRequestId" uuid,
+	"renterId" bigint,
+	"ownerId" bigint)
+    RETURNS uuid
+    LANGUAGE 'plpgsql'
+    COST 100.0
+    VOLATILE NOT LEAKPROOF 
+AS $function$
+
+DECLARE
+	"id" uuid;
+    "startDate" timestamp with time zone;
+BEGIN
+	"id" := uuid_generate_v4();
+    "startDate" := now;
+ 	INSERT INTO "conversation" ("id", "rentRequestId", "renterId", "ownerId", "startDate")
+    VALUES ("id", "rentRequestId", "renterId", "ownerId", "startDate");
+    
+    RETURN "id";
+END;
+
+$function$;
+
+ALTER FUNCTION public."createConversation"(uuid, bigint, bigint)
+    OWNER TO postgres;
+
+-- FUNCTION: public.createMessage(bigint, text, uuid)
+
+-- DROP FUNCTION public.createMessage(bigint, text, uuid);
+
+CREATE OR REPLACE FUNCTION public."createMessage"(
+	"senderId" bigint,
+	content text,
+	"conversationId" uuid)
+    RETURNS uuid
+    LANGUAGE 'plpgsql'
+    COST 100.0
+    VOLATILE NOT LEAKPROOF 
+AS $function$
+
+DECLARE
+	"messageId" uuid;
+    "timeSent" timestamp with time zone;
+BEGIN
+	"messageId" := uuid_generate_v4();
+    "timeSent" := now;
+ 	INSERT INTO "message" ("messageId", "senderId", "timeSent", "content", "conversationId")
+    VALUES ("messageId", "senderId", "timeSent", "content", "conversationId");
+    
+    RETURN "messageId";
+END;
+
+$function$;
+
+ALTER FUNCTION public."createMessage"(bigint, text, uuid)
+    OWNER TO postgres;
+
+-- FUNCTION: public.createRentRequest(bigint, bigint, timestamp with time zone, timestamp with time zone, text, text, text)
+
+-- DROP FUNCTION public.createRentRequest(bigint, bigint, timestamp with time zone, timestamp with time zone, text, text, text);
+
+CREATE OR REPLACE FUNCTION public."createRentRequest"(
+	"renterId" bigint,
+	"itemId" bigint,
+	"startDate" timestamp with time zone,
+	"endDate" timestamp with time zone,
+	status text DEFAULT NULL::text,
+	comments text DEFAULT NULL::text,
+	questions text DEFAULT NULL::text)
+    RETURNS uuid
+    LANGUAGE 'plpgsql'
+    COST 100.0
+    VOLATILE NOT LEAKPROOF 
+AS $function$
+
+DECLARE
+	"requestId" uuid;
+BEGIN
+	"requestId" := uuid_generate_v4();
+ 	INSERT INTO "rentRequest" ("requestId", "renterId", "itemId", "startDate", "endDate", "status", "comments", "questions")
+    VALUES ("requestId", "renterId", "itemId", "startDate", "endDate", "status", "comments", "questions");
+    
+    RETURN "requestId";
+END;
+
+$function$;
+
+ALTER FUNCTION public."createRentRequest"(bigint, bigint, timestamp with time zone, timestamp with time zone, text, text, text)
+    OWNER TO postgres;
+
+-- FUNCTION: public.createRentalItem(text, text, double precision, uuid, bigint, text, text[], text[])
+
+-- DROP FUNCTION public.createRentalItem(text, text, double precision, uuid, bigint, text, text[], text[]);
+
+CREATE OR REPLACE FUNCTION public."createRentalItem"(
+	title text,
+	description text,
+	price double precision,
+	"addressId" uuid,
+	"ownerId" bigint,
+	"termsOfUse" text DEFAULT NULL::text,
+	category text[] DEFAULT NULL::text[],
+	photo text[] DEFAULT NULL::text[])
+    RETURNS uuid
+    LANGUAGE 'plpgsql'
+    COST 100.0
+    VOLATILE NOT LEAKPROOF 
+AS $function$
+
+DECLARE
+	"itemId" bigint;
+BEGIN
+ 	INSERT INTO "rentalItem" ("title", "description", "price", "addressId", "termsOfUse", "ownerId", "category", "photo")
+    VALUES ("title", "description", "price", "addressId", "termsOfUse", "ownerId", "category", "photo")
+    RETURNING "itemId" INTO "itemId";
+    RETURN "itemId";
+END;
+
+$function$;
+
+ALTER FUNCTION public."createRentalItem"(text, text, double precision, uuid, bigint, text, text[], text[])
+    OWNER TO postgres;
+
+-- FUNCTION: public.createUser(text, text, text, text, text, text)
+
+-- DROP FUNCTION public.createUser(text, text, text, text, text, text);
+
+CREATE OR REPLACE FUNCTION public."createUser"(
+	"firstName" text,
+	"lastName" text,
+	email text,
+	password text,
+	"photoUrl" text DEFAULT NULL::text,
+	description text DEFAULT NULL::text)
+    RETURNS uuid
+    LANGUAGE 'plpgsql'
+    COST 100.0
+    VOLATILE NOT LEAKPROOF 
+AS $function$
+
+DECLARE
+	"userId" bigint;
+    "avgRating" double precision;
+BEGIN
+    "avgRating" := NULL;
+ 	INSERT INTO "userTable" ("firstName", "lastName", "email", "password", "photoUrl", "description", "avgRating")
+    VALUES ("firstName", "lastName", "email", "password", "photoUrl", "description", "avgRating")
+    RETURNING "userId" INTO "userId";
+    RETURN "userId";
+END;
+
+$function$;
+
+ALTER FUNCTION public."createUser"(text, text, text, text, text, text)
+    OWNER TO postgres;
+
+-- FUNCTION: public.createUserReview(text, bigint, bigint, integer, text)
+
+-- DROP FUNCTION public.createUserReview(text, bigint, bigint, integer, text);
+
+CREATE OR REPLACE FUNCTION public."createUserReview"(
+	title text,
+	"userIdFor" bigint,
+	"userIdFrom" bigint,
+	rating integer,
+	comment text DEFAULT NULL::text)
+    RETURNS uuid
+    LANGUAGE 'plpgsql'
+    COST 100.0
+    VOLATILE NOT LEAKPROOF 
+AS $function$
+
+DECLARE
+	"reviewId" uuid;
+    "creationTime" timestamp with time zone;
+BEGIN
+	"reviewId" := uuid_generate_v4();
+    "creationTime" := now;
+ 	INSERT INTO "userReview" ("reviewId", "title", "comment", "userIdFor", "userIdFrom", "rating", "creationTime")
+    VALUES ("reviewId", "title", "comment", "userIdFor", "userIdFrom", "rating", "creationTime");
+    
+    RETURN "reviewId";
+END;
+
+$function$;
+
+ALTER FUNCTION public."createUserReview"(text, bigint, bigint, integer, text)
+    OWNER TO postgres;
