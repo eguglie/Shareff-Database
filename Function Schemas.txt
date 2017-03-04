@@ -83,7 +83,7 @@ DECLARE
     "startDate" timestamp with time zone;
 BEGIN
 	"id" := uuid_generate_v4();
-    "startDate" := now;
+    "startDate" := now();
  	INSERT INTO "conversation" ("id", "rentRequestId", "renterId", "ownerId", "startDate")
     VALUES ("id", "rentRequestId", "renterId", "ownerId", "startDate");
     
@@ -114,7 +114,7 @@ DECLARE
     "timeSent" timestamp with time zone;
 BEGIN
 	"messageId" := uuid_generate_v4();
-    "timeSent" := now;
+    "timeSent" := now();
  	INSERT INTO "message" ("messageId", "senderId", "timeSent", "content", "conversationId")
     VALUES ("messageId", "senderId", "timeSent", "content", "conversationId");
     
@@ -131,13 +131,13 @@ ALTER FUNCTION public."createMessage"(bigint, text, uuid)
 -- DROP FUNCTION public.createRentRequest(bigint, bigint, timestamp with time zone, timestamp with time zone, text, text, text);
 
 CREATE OR REPLACE FUNCTION public."createRentRequest"(
-	"renterId" bigint,
-	"itemId" bigint,
-	"startDate" timestamp with time zone,
-	"endDate" timestamp with time zone,
-	status text DEFAULT NULL::text,
-	comments text DEFAULT NULL::text,
-	questions text DEFAULT NULL::text)
+    "renterId" bigint,
+    "itemId" bigint,
+    "startDate" timestamp with time zone,
+    "endDate" timestamp with time zone,
+    status text DEFAULT NULL::text,
+    comments text DEFAULT NULL::text,
+    questions text DEFAULT NULL::text)
     RETURNS uuid
     LANGUAGE 'plpgsql'
     COST 100.0
@@ -145,11 +145,13 @@ CREATE OR REPLACE FUNCTION public."createRentRequest"(
 AS $function$
 
 DECLARE
-	"requestId" uuid;
+    "requestId" uuid;
+    "dateCreated" timestamp with time zone;
 BEGIN
-	"requestId" := uuid_generate_v4();
- 	INSERT INTO "rentRequest" ("requestId", "renterId", "itemId", "startDate", "endDate", "status", "comments", "questions")
-    VALUES ("requestId", "renterId", "itemId", "startDate", "endDate", "status", "comments", "questions");
+    "requestId" := uuid_generate_v4();
+    "dateCreated" := now();
+    INSERT INTO "rentRequest" ("requestId", "renterId", "itemId", "startDate", "endDate", "status", "comments", "questions", "dateCreated")
+    VALUES ("requestId", "renterId", "itemId", "startDate", "endDate", "status", "comments", "questions", "dateCreated");
     
     RETURN "requestId";
 END;
@@ -159,37 +161,40 @@ $function$;
 ALTER FUNCTION public."createRentRequest"(bigint, bigint, timestamp with time zone, timestamp with time zone, text, text, text)
     OWNER TO postgres;
 
--- FUNCTION: public.createRentalItem(text, text, double precision, uuid, bigint, text, text[], text[])
+-- FUNCTION: public.createRentalItem(text, text, double precision, text, uuid, bigint, text, text[], text[])
 
--- DROP FUNCTION public.createRentalItem(text, text, double precision, uuid, bigint, text, text[], text[]);
+-- DROP FUNCTION public.createRentalItem(text, text, double precision, text, uuid, bigint, text, text[], text[]);
 
 CREATE OR REPLACE FUNCTION public."createRentalItem"(
-	title text,
-	description text,
-	price double precision,
-	"addressId" uuid,
-	"ownerId" bigint,
-	"termsOfUse" text DEFAULT NULL::text,
-	category text[] DEFAULT NULL::text[],
-	photo text[] DEFAULT NULL::text[])
-    RETURNS uuid
+    title text,
+    description text,
+    price double precision,
+    "costPeriod" text,
+    "addressId" uuid,
+    "ownerId" bigint,
+    "termsOfUse" text DEFAULT NULL::text,
+    category text[] DEFAULT NULL::text[],
+    photos text[] DEFAULT NULL::text[])
+    RETURNS bigint
     LANGUAGE 'plpgsql'
     COST 100.0
     VOLATILE NOT LEAKPROOF 
 AS $function$
 
 DECLARE
-	"itemId" bigint;
+    "rItemId" bigint;
+    "dateCreated" timestamp with time zone;
 BEGIN
- 	INSERT INTO "rentalItem" ("title", "description", "price", "addressId", "termsOfUse", "ownerId", "category", "photo")
-    VALUES ("title", "description", "price", "addressId", "termsOfUse", "ownerId", "category", "photo")
-    RETURNING "itemId" INTO "itemId";
-    RETURN "itemId";
+    "dateCreated" := now();
+    INSERT INTO public."rentalItem" ("title", "description", "price", "costPeriod", "addressId", "termsOfUse", "ownerId", "category", "photos", "dateCreated")
+    VALUES ("title", "description", "price", "costPeriod", "addressId", "termsOfUse", "ownerId", "category", "photos", "dateCreated")
+    RETURNING "itemId" INTO "rItemId";
+    RETURN "rItemId";
 END;
 
 $function$;
 
-ALTER FUNCTION public."createRentalItem"(text, text, double precision, uuid, bigint, text, text[], text[])
+ALTER FUNCTION public."createRentalItem"(text, text, double precision, text, uuid, bigint, text, text[], text[])
     OWNER TO postgres;
 
 -- FUNCTION: public.createUser(text, text, text, text, text, text)
@@ -203,7 +208,7 @@ CREATE OR REPLACE FUNCTION public."createUser"(
 	password text,
 	"photoUrl" text DEFAULT NULL::text,
 	description text DEFAULT NULL::text)
-    RETURNS uuid
+    RETURNS bigint
     LANGUAGE 'plpgsql'
     COST 100.0
     VOLATILE NOT LEAKPROOF 
@@ -246,7 +251,7 @@ DECLARE
     "creationTime" timestamp with time zone;
 BEGIN
 	"reviewId" := uuid_generate_v4();
-    "creationTime" := now;
+    "creationTime" := now();
  	INSERT INTO "userReview" ("reviewId", "title", "comment", "userIdFor", "userIdFrom", "rating", "creationTime")
     VALUES ("reviewId", "title", "comment", "userIdFor", "userIdFrom", "rating", "creationTime");
     
@@ -257,3 +262,90 @@ $function$;
 
 ALTER FUNCTION public."createUserReview"(text, bigint, bigint, integer, text)
     OWNER TO postgres;
+
+
+CREATE OR REPLACE FUNCTION public."deleteAddress"(
+    "id" uuid)
+    RETURNS void
+AS $$
+
+BEGIN
+    DELETE FROM "address" WHERE "addressId" = "id";
+END;
+$$ LANGUAGE 'plpgsql';
+
+
+CREATE OR REPLACE FUNCTION public."deleteBooking"(
+    "id" uuid)
+    RETURNS void
+AS $$
+
+BEGIN
+    DELETE FROM "booking" WHERE "bookingId" = "id";
+END;
+$$ LANGUAGE 'plpgsql';
+
+
+CREATE OR REPLACE FUNCTION public."deleteConversation"(
+    "conversationId" uuid)
+    RETURNS void
+AS $$
+
+BEGIN
+    DELETE FROM "conversation" WHERE "id" = "conversationId";
+END;
+$$ LANGUAGE 'plpgsql';
+
+
+CREATE OR REPLACE FUNCTION public."deleteMessage"(
+    "id" uuid)
+    RETURNS void
+AS $$
+
+BEGIN
+    DELETE FROM "message" WHERE "messageId" = "id";
+END;
+$$ LANGUAGE 'plpgsql';
+
+
+CREATE OR REPLACE FUNCTION public."deleteRentRequest"(
+    "id" uuid)
+    RETURNS void
+AS $$
+
+BEGIN
+    DELETE FROM "rentRequest" WHERE "requestId" = "id";
+END;
+$$ LANGUAGE 'plpgsql';
+
+
+CREATE OR REPLACE FUNCTION public."deleteRentalItem"(
+    "id" bigint)
+    RETURNS void
+AS $$
+
+BEGIN
+    DELETE FROM "rentalItem" WHERE "itemId" = "id";
+END;
+$$ LANGUAGE 'plpgsql';
+
+
+CREATE OR REPLACE FUNCTION public."deleteUser"(
+    "id" bigint)
+    RETURNS void
+AS $$
+
+BEGIN
+    DELETE FROM "userTable" WHERE "userId" = "id";
+END;
+$$ LANGUAGE 'plpgsql';
+
+CREATE OR REPLACE FUNCTION public."deleteUserReview"(
+    "id" uuid)
+    RETURNS void
+AS $$
+
+BEGIN
+    DELETE FROM "userReview" WHERE "reviewId" = "id";
+END;
+$$ LANGUAGE 'plpgsql';
